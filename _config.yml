@@ -1,0 +1,17 @@
+title: EZPage
+author:
+  name: rsnyder
+  email: ron@snyderjr.com
+
+# The `>` after `description:` means to ignore line-breaks until next key.
+# If you want to omit the line-break after the end of text, use `>-` instead.
+description: >-
+  Quickly build websites using Github Pages, Markdown, and interactive viewers.
+
+github:
+  owner: rsnyder
+  repo: ezpage
+  branch: main
+
+url: https://rsnyder.github.io/ezpage/
+baseurl: /ezpage/

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en" }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="{{ site.baseurl }}favicon.ico" rel="icon" />
+    {%- seo -%}
+    <link rel="stylesheet" href="{{ site.baseurl }}main.css">
+    <script src="https://rsnyder.github.io/ezpage-wc/js/index.js" type="module"></script>
+    <script src="https://juncture-digital.github.io/web-components/js/index.js" type="module"></script>
+    <script>window.config = JSON.parse('{"owner": "{{ site.github.owner }}", "repo": "{{ site.github.repo }}", "baseurl": "{{ site.baseurl }}"}')</script>
+  </head>
+  <body>
+    {%- include header.html -%}
+    <main class="page-content" aria-label="Content">
+      {{ content }}
+    </main>
+    {%- include footer.html -%}
+  </body>
+</html>
