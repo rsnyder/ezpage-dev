@@ -3,7 +3,7 @@
 
 '''
 Python dev server for ezpage site.
-Dependencies: fastapi Markdown PyYAML uvicorn
+Dependencies: bs4 fastapi html5lib Markdown pymdown-extensions PyYAML uvicorn
 '''
 
 import logging
@@ -15,6 +15,7 @@ import argparse, json, os
 
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 
+from bs4 import BeautifulSoup
 import markdown
 import yaml
 
@@ -81,8 +82,18 @@ html_template = html_template.replace('{{ site.github.owner }}', config['github'
 html_template = html_template.replace('{{ site.github.repo }}', config['github']['repo'])
 html_template = html_template.replace('{{ site.baseurl }}', '/')
   
-def html_from_markdown(md):
-  return html_template.replace('{{ content }}', markdown.markdown(md, extensions=['extra', 'toc']))
+def html_from_markdown(md, baseurl):
+  html = html_template.replace('{{ content }}', markdown.markdown(md, extensions=['extra', 'toc']))
+  soup = BeautifulSoup(html, 'html5lib')
+  for link in soup.find_all('a'):
+    href = link.get('href')
+    if href and not href.startswith('http') and not href.startswith('#') and not href.startswith('/'):
+      link['href'] = f'{baseurl}{href}'
+  for img in soup.find_all('img'):
+    src = img.get('src')
+    if not src.startswith('http') and not src.startswith('/'):
+      img['src'] = f'{baseurl}{src}'
+  return soup.prettify()
   
 @app.get('/{path:path}')
 async def serve(path: Optional[str] = None):
@@ -93,7 +104,7 @@ async def serve(path: Optional[str] = None):
     return Response(status_code=404, content=not_found_page, media_type='text/html')
   content = favicon if ext == 'ico' else open(local_file_path, 'r').read()
   if ext is None: # markdown file
-    content = html_from_markdown(content)
+    content = html_from_markdown(content, baseurl=f'/{"/".join(path)}/' if len(path) > 0 else '/')
   media_type = media_types[ext] if ext in media_types else 'text/html'
   return Response(status_code=200, content=content, media_type=media_type)
 

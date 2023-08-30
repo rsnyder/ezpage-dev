@@ -1,6 +1,8 @@
 # Folder
 
-- [up 1](..)
 - [Home](/)
+- [Home (relative)](..)
 - [About](/about)
-- [nested](./nested)
+- [About (relative)](../about)
+- [Nested](/folder/nested)
+- [Nested (relative)](nested)

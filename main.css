@@ -8,6 +8,21 @@ body {
   margin: 0;
 }
 
+body {
+  animation: fadeInAnimation ease .5s;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+}
+
+@keyframes fadeInAnimation {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 ez-header, .site-footer {
   display: block;
   margin: 0 auto;
@@ -31,4 +46,17 @@ ul {
 
 .section-1 {
   display: flow-root;
+}
+
+ez-header {
+  height: 74px;
+  background-color: #444444;
+}
+ez-header ul {
+  display: none;
+}
+
+h1 {
+  font-size: 2rem;
+  margin: .5rem;
 }

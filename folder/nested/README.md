@@ -1,6 +1,8 @@
 # Nested
 
-- [up 1](..)
-- [up 2](../..)
 - [Home](/)
+- [Home (relative)](../..)
+- [Folder](/folder)
+- [Folder (relative)](..)
 - [About](/about)
+- [About (relative)](../../about)
