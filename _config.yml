@@ -1,4 +1,4 @@
-title: EZPage
+title: EZPage Dev
 author:
   name: rsnyder
   email: ron@snyderjr.com
@@ -10,8 +10,8 @@ description: >-
 
 github:
   owner: rsnyder
-  repo: ezpage
+  repo: ezpage-dev
   branch: main
 
-url: https://rsnyder.github.io/ezpage/
-baseurl: /ezpage/
+url: https://rsnyder.github.io/ezpage-dev/
+baseurl: /ezpage-dev/
