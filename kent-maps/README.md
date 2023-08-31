@@ -1,5 +1,6 @@
 # Featured essays
 <param data-class="cards">
+<span data-attr="cards"></span>
 
 ## 
 [Mobile Landscapes - Finding Kent Dickensian](dickens/mobile-landscapes)
