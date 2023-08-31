@@ -1,4 +1,5 @@
-# Featured essays {.cards}
+# Featured essays
+<param class="cards">
 
 ##
 [Mobile Landscapes - Finding Kent Dickensian](dickens/mobile-landscapes)
