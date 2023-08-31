@@ -1,5 +1,5 @@
 # Featured essays
-<param data-class="cards">
+<param class="cards">
 <span data-attr="cards"></span>
 
 ## 
