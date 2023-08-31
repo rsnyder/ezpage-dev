@@ -2,14 +2,14 @@
 <param class="cards">
 <span data-attr="cards"></span>
 
-## 
+## Mobile Landscapes
 [Mobile Landscapes - Finding Kent Dickensian](dickens/mobile-landscapes)
 
 ![](https://raw.githubusercontent.com/kent-map/kent/main/images/thumbnails/mobile-landscapes.jpg)
 
 You’ll need a map because there are no signposts ... There are witnesses of course, hundreds of them queueing up to tell you that they are the original Aunt Betsey, or Broadstairs fisherman, or Janet, or how sorry they are now for stealing that pie.
 
-##
+## H.G.Wells
 [H.G.Wells](20c/20c-wellshg-biography)
 
 ![](https://iiif.juncture-digital.org/thumbnail?url=https://stor.artstor.org/stor/3615ba37-88b4-4c75-95b0-6710b43d7c73)
