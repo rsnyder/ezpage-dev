@@ -1,6 +1,5 @@
 # Featured essays
 <param class="cards">
-<span data-attr="cards"></span>
 
 ## Mobile Landscapes
 [Mobile Landscapes - Finding Kent Dickensian](dickens/mobile-landscapes)
@@ -52,7 +51,7 @@ Paul Nash was a war artist and photographer who became an important influence in
 
 English writer Edith Nesbit, who wrote as E. Nesbit, has close links to the coastal county of Kent in South East England. In childhood and adolescence, she spent formative years in the village of Halstead, in the Sevenoaks District of Kent. Several of her best-loved stories for children include descriptions of her childhood home.
 
-## 
+## &nbsp;
 [Vita Sackville-West](20c/20c-sackville-west-biography)
 
 ![](https://iiif.juncture-digital.org/thumbnail?url=https://raw.githubusercontent.com/kent-map/kent/main/20c/images/sissinghurst2.jpg)
