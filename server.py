@@ -93,6 +93,11 @@ def html_from_markdown(md, baseurl):
     src = img.get('src')
     if not src.startswith('http') and not src.startswith('/'):
       img['src'] = f'{baseurl}{src}'
+  for param in soup.find_all('param'):
+    param.parent.insert_after(param)
+  for para in soup.find_all('p'):
+    if para.renderContents().decode('utf-8').strip() == '':
+      para.decompose()
   return soup.prettify()
   
 @app.get('/{path:path}')
@@ -115,4 +120,4 @@ if __name__ == '__main__':
   parser.add_argument('--port', type=int, default=8080, help='HTTP port')
   args = vars(parser.parse_args())
   
-  uvicorn.run('dev-server:app', port=args['port'], log_level='info', reload=args['reload'])
+  uvicorn.run('server:app', port=args['port'], log_level='info', reload=args['reload'])

@@ -6,8 +6,6 @@ banner="/images/banners/20c.jpg">
 <param ve-entity eid="Q736439" aliases="Ramsgate">
 <param ve-entity eid="Q921173" aliases="Aldington">
 
-# Herbert George Wells (H.G Wells) (1866-1946)
-
 **Publications of Interest:** _The Sea Lady_ (1902), _Kipps_ (1905) and _The History of Mr. Polly_ (1910)   
 <br>
 “This bus it was, this ruddy, venerable and, under God's mercy, immortal bus, that came down the Folkestone hill with unflinching deliberation, and trundled through Sandgate and Hythe, and out into the windy spaces of the Marsh, with Kipps and all his fortunes on its brow.” _Kipps_
