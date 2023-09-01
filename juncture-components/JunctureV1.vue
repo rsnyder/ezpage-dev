@@ -111,7 +111,7 @@ const componentsList = [
 const componentPrefix = 've1-'
 
 const contentSource = {
-  basePath: '/', 
+  basePath: '', 
   acct: window.config.owner, 
   repo: window.config.repo, 
   ref: window.config.branch, 
@@ -124,8 +124,8 @@ const qargs = {}
 
 module.exports = {
   components: {
-    've-footer': window.httpVueLoader('https://raw.githubusercontent.com/JSTOR-Labs/juncture/main/components/Footer.vue'),
-    've-header': window.httpVueLoader('https://raw.githubusercontent.com/JSTOR-Labs/juncture/main/components/Header.vue'),
+    've-footer': window.httpVueLoader(`${window.config.baseurl}juncture-components/Footer.vue`),
+    've-header': window.httpVueLoader(`${window.config.baseurl}juncture-components/Header.vue`),
     've1-image': window.httpVueLoader(`${window.config.baseurl}juncture-components/Image.vue`),
     've-visual-essay': window.httpVueLoader(`${window.config.baseurl}juncture-components/VisualEssay.vue`),
   },
@@ -238,8 +238,9 @@ module.exports = {
       } else if (action === 'logout') {
         this.logout()
       } else if (action === 'load-page') {
-        let newPage = `${this.contentSource.baseUrl}${this.contentSource.basePath}${options}`
+        let newPage = `${this.contentSource.basePath}${options}`
         if (this.qargs.ref) newPage += `?ref=${this.qargs.ref}`
+        console.log('load-page', this.contentSource.basePath)
         location.href = newPage
       }
     },
@@ -747,6 +748,7 @@ Vue.mixin({
           return { sha: resp.sha, content: decodeURIComponent(escape(atob(resp.content))) }
         }
       } else {
+        console.log(url)
         let url = `${this.contentSource.baseUrl}${this.contentSource.basePath}${path}`
         let resp = await fetch(url)
         if (resp.ok) resp = await resp.text()
@@ -898,7 +900,7 @@ function convertURL(current, base) {
     pathElems = pathElems.slice(1)
   }
   let converted = `${contentSource.assetsBaseUrl || contentSource.baseUrl}/${pathElems.join('/')}`
-  // console.log(`isJuncture=${isJuncture} convertURL: current=${current} converted=${converted} path=${path} pathElems=${pathElems}`)
+  // console.log(`isJuncture=${isJuncture} convertURL: current=${current} converted=${converted} pathElems=${pathElems}`)
   return converted
 }
 

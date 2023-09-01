@@ -275,6 +275,15 @@ function getDomPath(el) {
 }
 </script>
 
+<style>
+  .popup {
+    background-color: #ffffff;
+    border-radius: 4px;
+    box-shadow: 0 0 4px 0 rgba(0,0,0,0.2);
+    padding: 12px;
+  }
+</style>
+
 <style scoped>
   .cards {
     display: grid;
