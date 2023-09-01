@@ -80,6 +80,7 @@ html_template = html_template.replace('https://rsnyder.github.io/ezpage-wc/js/in
 html_template = html_template.replace('{%- seo -%}', seo)
 html_template = html_template.replace('{{ site.github.owner }}', config['github']['owner'])
 html_template = html_template.replace('{{ site.github.repo }}', config['github']['repo'])
+html_template = html_template.replace('{{ site.github.branch }}', config['github']['branch'])
 html_template = html_template.replace('{{ site.baseurl }}', '/')
   
 def html_from_markdown(md, baseurl):

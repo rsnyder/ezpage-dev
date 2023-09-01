@@ -108,24 +108,26 @@ const componentsList = [
   'https://raw.githubusercontent.com/jstor-labs/juncture/v2/components/Image.vue'
 ]
 
-// const contentSource = await getContentSource()
-// const siteConfig = await getSiteConfig()
-// const componentsList = await getComponentsList()
 const componentPrefix = 've1-'
 
-const contentSource = {basePath: '/', acct: 'kent-map', repo: 'kent', ref: 'main', baseUrl: 'https://raw.githubusercontent.com/kent-map/kent/main/'}
+const contentSource = {
+  basePath: '/', 
+  acct: window.config.owner, 
+  repo: window.config.repo, 
+  ref: window.config.branch, 
+  baseUrl: `https://raw.githubusercontent.com/${window.config.owner}/${window.config.repo}/${window.config.branch}/`
+}
 const siteConfig = {}
 const ghToken = ''
 const isJuncture = true
 const qargs = {}
 
-
 module.exports = {
   components: {
     've-footer': window.httpVueLoader('https://raw.githubusercontent.com/JSTOR-Labs/juncture/main/components/Footer.vue'),
     've-header': window.httpVueLoader('https://raw.githubusercontent.com/JSTOR-Labs/juncture/main/components/Header.vue'),
-    've1-image': window.httpVueLoader('/ezpage-dev/juncture-components/Image.vue'),
-    've-visual-essay': window.httpVueLoader('/ezpage-dev/juncture-components/VisualEssay.vue'),
+    've1-image': window.httpVueLoader(`${window.config.baseurl}juncture-components/Image.vue`),
+    've-visual-essay': window.httpVueLoader(`${window.config.baseurl}juncture-components/VisualEssay.vue`),
   },
   props: {
     inputHtml: String
@@ -168,7 +170,6 @@ module.exports = {
   }),
   computed: {
     isAdminUser() { return ENV === 'DEV' || this.authenticatedUser !== null && (this.authenticatedUser.isAdmin || contentSource.acct === this.authenticatedUser.acct) },
-    // ghToken() { return oauthAccessToken || ghUnscopedToken },
     viewerStyle() { return { 
       height: this.viewerIsOpen
         ? this.isVerticalLayout 
@@ -180,7 +181,7 @@ module.exports = {
     isVerticalLayout() { return !this.forceHorizontalLayout && this.layouts.indexOf('vertical') >= 0 },
     loginsEnabled() { return this.oauthCredsFound && (!this.essayConfig || !this.essayConfig['logins-disabled']) }
   },
-  mounted() {
+  async mounted() {
     let path
     if (window.location.href.indexOf('#') > 0) {
       path = window.location.href.split('#')[0].split('/').slice(3).join('')
@@ -192,13 +193,11 @@ module.exports = {
       path = path.length > 1 && path.slice(-1) === '/' ? path.slice(0,-1) : path
     }
     this.path = path
-    // let pathIsDir = await isDir(path, this.contentSource)
     let pathIsDir = true
     this.mdDir = pathIsDir ? path : `/${path.split('/').filter(elem => elem).slice(0,-1).join('/')}`
     this.mdPath = pathIsDir ? path === '/' ? '/README.md' : `${path}/README.md` : `${path}.md`
-    // console.log(`mdDir=${this.mdDir} mdPath=${this.mdPath}`)
     // Initialize Markdown source viewer
-    // this.markdown = await getGhFile(this.mdPath)
+    this.markdown = await getGhFile(this.mdPath)
     this.markdownViewer = tippy(this.$refs.header, {
       trigger: 'manual', 
       theme: 'light-border',
@@ -250,7 +249,8 @@ module.exports = {
     },
 
     // Updates viewer data from events emitted when viewer components are loaded
-    updateComponentData(data) { this.viewerData = {...this.viewerData, ...data }},
+    updateComponentData(data) { 
+      this.viewerData = {...this.viewerData, ...data }},
 
     // Sets active element based on essay window scroll position
     onScroll: _.throttle(function (e) {
@@ -260,64 +260,6 @@ module.exports = {
     }, 5),
     scroll() {},
     scrollToAnchor() {},
-
-    parseSection(section, id) {
-      let sectionCtr = 0
-      let segCtr = 0
-      if (section.classList.contains('cards') && !section.classList.contains('wrapper')) {
-        section.classList.remove('cards')
-        let wrapper = document.createElement('section')
-        wrapper.className = 'cards wrapper'
-        Array.from(section.querySelectorAll(':scope > section')).forEach(sec => {
-          sec.classList.add('card')
-          wrapper.appendChild(sec)
-          // section.removeChild(sec)
-        })
-        section.appendChild(wrapper)
-      }
-
-      Array.from(section.children).forEach(el => {
-        if (el.tagName === 'SECTION') {
-          let dataId = `${id}.${++sectionCtr}`
-          el.setAttribute('data-id', dataId)
-          this.parseSection(el, dataId)
-        } else if (el.tagName === 'P' || el.tagName === 'UL' || el.tagName === 'OL') {
-          let params = []
-          Array.from(el.querySelectorAll(':scope > param')).forEach(param => {
-            params.push(param)
-            el.removeChild(param)
-          })
-          let content = el.innerHTML.trim()
-          if (content) {
-            let seg = document.createElement('div')
-            let dataId = `${id}.${++segCtr}`
-            seg.setAttribute('data-id', dataId)
-            seg.setAttribute('id', dataId)
-            seg.classList.add('segment')
-            seg.innerHTML = el.outerHTML
-            params.forEach(param => seg.append(param))
-            el.replaceWith(seg)
-          } else {
-            params.forEach(param => section.insertBefore(param, el))
-            section.removeChild(el)
-          }
-        }
-      })
-    },
-
-    /*
-    if (elClasses.indexOf('cards') >= 0) {
-      let wrapper = new DOMParser().parseFromString(`<section class="${elClasses.join(' ')}"></section>`, 'text/html').children[0].children[1].children[0]
-      currentSection.appendChild(wrapper)
-    } else {
-      currentSection.classList.add(...elClasses)
-      let wrapper = parent.querySelector(':scope > .cards')
-      if (wrapper) {
-        currentSection.classList.add('card')
-        parent = wrapper
-      }
-    }
-    */
   
     async parseEssay() {
       let tmp = new DOMParser().parseFromString(this.inputHtml, 'text/html').children[0].children[1]
@@ -361,7 +303,6 @@ module.exports = {
       essayConfig.main = essayConfig.main || essayConfig.component || 'visual-essay'
       essayConfig.footer = essayConfig.footer || 'footer'
       this.essayConfig = essayConfig
-
     },
 
     // Finds all entity references in param tags
@@ -387,6 +328,50 @@ module.exports = {
         .forEach(entity => { if (!entities[entity.eid]) entities[entity.eid] = entity })
 
       return entities
+    },
+
+    parseSection(section, id) {
+      let sectionCtr = 0
+      let segCtr = 0
+      if (section.classList.contains('cards') && !section.classList.contains('wrapper')) {
+        section.classList.remove('cards')
+        let wrapper = document.createElement('section')
+        wrapper.className = 'cards wrapper'
+        Array.from(section.querySelectorAll(':scope > section')).forEach(sec => {
+          sec.classList.add('card')
+          wrapper.appendChild(sec)
+          // section.removeChild(sec)
+        })
+        section.appendChild(wrapper)
+      }
+
+      Array.from(section.children).forEach(el => {
+        if (el.tagName === 'SECTION') {
+          let dataId = `${id}.${++sectionCtr}`
+          el.setAttribute('data-id', dataId)
+          this.parseSection(el, dataId)
+        } else if (el.tagName === 'P' || el.tagName === 'UL' || el.tagName === 'OL') {
+          let params = []
+          Array.from(el.querySelectorAll(':scope > param')).forEach(param => {
+            params.push(param)
+            el.removeChild(param)
+          })
+          let content = el.innerHTML.trim()
+          if (content) {
+            let seg = document.createElement('div')
+            let dataId = `${id}.${++segCtr}`
+            seg.setAttribute('data-id', dataId)
+            seg.setAttribute('id', dataId)
+            seg.classList.add('segment')
+            seg.innerHTML = el.outerHTML
+            params.forEach(param => seg.append(param))
+            el.replaceWith(seg)
+          } else {
+            params.forEach(param => section.insertBefore(param, el))
+            section.removeChild(el)
+          }
+        }
+      })
     },
 
     // Gets labels, aliases, images and geo coords for referenced Wikdata entities
@@ -829,115 +814,10 @@ Vue.mixin({
   }
 })
 
-// Gets site config
-async function getSiteConfig() {
-  let config = await getGhFile('config.yaml')
-  config = config ? YAML.parse(config) : {}
-  if (config.banner) config.banner = convertURL(config.banner)
-
-  // if (config.gcApiKey) gcApiKey = atob(config.gcApiKey)
-  // if (config.gcAuthDomain) gcAuthDomain = atob(config.gcAuthDomain)
-  // if (config.gaPropertyID) gaPropertyID = config.gaPropertyID
-  // if (config.fontawesome) fontawesome = config.fontawesome
-  return config
-}
-
-async function getContentSource() {
-  let contentSource = {}
-  let pathElems = window.location.pathname.split('/').filter(elem => elem !== '')
-  let ghRepoInfo = await githubRepoInfo(pathElems[0], pathElems[1])
-  contentSource = {
-    ...ghRepoInfo, 
-    ...{
-      baseUrl: window.location.origin, 
-      basePath: `/${ghRepoInfo.acct}/${ghRepoInfo.repo}`, 
-      assetsBaseUrl: `https://raw.githubusercontent.com/${ghRepoInfo.acct}/${ghRepoInfo.repo}/${ghRepoInfo.ref}`
-    }
-  }
-  return contentSource
-}
-
-async function githubRepoInfo(acct, repo) {
-  let ghInfo = {}
-  let resp = await fetch(`https://api.github.com/repos/${acct}/${repo}`, {headers: {Authorization: `Token ${ghToken}`}} )
-  if (resp.ok) {
-    resp = await resp.json()
-    ghInfo = {acct, repo, branch: resp.default_branch, ref: qargs.ref || resp.default_branch}
-  }
-  return ghInfo
-}
-
-  
-async function isDir(root, ghSource) {
-  let dirList = await dir(root, ghSource)
-  return Object.keys(dirList).length > 0
-}
-
-async function dir(root, ghSource) {
-  let cacheKey = ghSource ? `${ghSource.acct}/${ghSource.repo}/${ghSource.hash || ghSource.ref}${root}` : root
-  if (!dirCache[cacheKey]) {
-    let files = {}
-    if (ghSource) {
-      let url = `https://api.github.com/repos/${ghSource.acct}/${ghSource.repo}/git/trees/${ghSource.hash || ghSource.ref}`
-      let pathElems = root.split('/').filter(pe => pe)
-      let _dirList, found
-      for (let i = 0; i < pathElems.length; i++) {
-        _dirList = await ghDirList(url)
-        found = _dirList ? _dirList.tree.find(item => item.path === pathElems[i]) : null
-        url = found ? found.url : null
-        if (!url) break
-      }
-      if (url) {
-        _dirList = await ghDirList(url)
-        files = Object.fromEntries(_dirList.tree.map(item => [item.path, `https://raw.githubusercontent.com/${ghSource.acct}/${ghSource.repo}/${ghSource.hash || ghSource.ref}${root}/${item.path}`]))
-      }
-    }
-    dirCache[cacheKey] = files
-  }
-  return dirCache[cacheKey]
-}
-
-async function ghDirList(url) {
-  let resp = await fetch(url, { headers: {Authorization: `Token ${ghToken}`}} )
-  return resp.ok ? await resp.json() : null
-}
-
-// Gets a list of available components
-async function getComponentsList() {
-  return [
-    ...Object.values(await dir('/custom/components', contentSource)),
-    ...Object.values(await dir('/components', contentSource)),
-    ...Object.values(await dir('/components', {acct: 'jstor-labs', repo: 'juncture', hash: 'v2'}))
-  ]
-}
-
 async function getGhFile(path) {
-  let url = `https://api.github.com/repos/${contentSource.acct}/${contentSource.repo}/contents${path}?ref=${contentSource.ref}`
-  let resp = await fetch(url, ghToken ? {headers: {Authorization:`Token ${ghToken}`}} : {})
-  if (resp.ok) {
-    resp = await resp.json()
-    return decodeURIComponent(escape(atob(resp.content)))
-  }
-}
-
-function parseQueryString(queryString) {
-  queryString = queryString || window.location.search
-  const dictionary = {}
-  try {
-    if (queryString.indexOf('?') === 0) queryString = queryString.substr(1)
-    const parts = queryString.split('&')
-    for (let i = 0; i < parts.length; i++) {
-      const kvp = parts[i].split('=')
-      if (kvp[0] !== '') {
-        if (kvp.length === 2) {
-          dictionary[kvp[0]] = decodeURIComponent(kvp[1]).replace(/\+/g, ' ')
-        } else {
-          dictionary[kvp[0]] = 'true'
-        }
-      }
-    }
-  } catch (err) { console.log(err) }
-  return dictionary
+  let url = `https://raw.githubusercontent.com/${contentSource.acct}/${contentSource.repo}/${contentSource.ref}/${path}`
+  let resp = await fetch(url)
+  if (resp.ok) return await resp.text()
 }
 
 function getDomPath(el) {
