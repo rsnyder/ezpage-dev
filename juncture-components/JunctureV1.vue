@@ -124,8 +124,8 @@ module.exports = {
   components: {
     've-footer': window.httpVueLoader('https://raw.githubusercontent.com/JSTOR-Labs/juncture/main/components/Footer.vue'),
     've-header': window.httpVueLoader('https://raw.githubusercontent.com/JSTOR-Labs/juncture/main/components/Header.vue'),
-    've1-image': window.httpVueLoader('/juncture-components/Image.vue'),
-    've-visual-essay': window.httpVueLoader('/juncture-components/VisualEssay.vue'),
+    've1-image': window.httpVueLoader('/ezpage-dev/juncture-components/Image.vue'),
+    've-visual-essay': window.httpVueLoader('/ezpage-dev/juncture-components/VisualEssay.vue'),
   },
   props: {
     inputHtml: String
