@@ -436,8 +436,8 @@ module.exports = {
     },
     async loadAnnotations() {
       let annosFile = `${this.currentItemSourceHash}.json`
-      let files = await this.dir(this.mdDir, this.contentSource.repo ? this.contentSource : null)
-      if (files[annosFile]) {  
+      // let files = await this.dir(this.mdDir, this.contentSource.repo ? this.contentSource : null)
+      // if (files[annosFile]) {  
         let path = `${this.mdDir}/${annosFile}`
         this.getFile(path, this.contentSource.acct, this.contentSource.repo, this.contentSource.ref).then(annos => {
           if (annos && annos.content && annos.content.length > 0) {
@@ -450,7 +450,7 @@ module.exports = {
           this.annoCursor = 0
           if (this.annotations.length > 0) this.showAnnotationsNavigator = true
         })
-      }
+      //}
     },
     saveAnnotations() {
       this.annotations = this.annotator.getAnnotations()

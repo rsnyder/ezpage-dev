@@ -1,3 +1,3 @@
 # EZPage
 
-- [Kent Maps](/kent-maps)
+- [Juncture 1 Essay](/juncture1)

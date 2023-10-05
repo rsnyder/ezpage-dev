@@ -102,16 +102,14 @@ window.html = `<<HTML>>`
 
 const ENV = 'PROD'
 const availableViewers = [
-  've1-image'
-]
-const componentsList = [
-  'https://raw.githubusercontent.com/jstor-labs/juncture/v2/components/Image.vue'
+  've1-image',
+  've1-map'
 ]
 
 const componentPrefix = 've1-'
 
 const contentSource = {
-  basePath: '', 
+  basePath: window.config.baseurl, 
   acct: window.config.owner, 
   repo: window.config.repo, 
   ref: window.config.branch, 
@@ -124,10 +122,11 @@ const qargs = {}
 
 module.exports = {
   components: {
-    've-footer': window.httpVueLoader(`${window.config.baseurl}juncture-components/Footer.vue`),
-    've-header': window.httpVueLoader(`${window.config.baseurl}juncture-components/Header.vue`),
-    've1-image': window.httpVueLoader(`${window.config.baseurl}juncture-components/Image.vue`),
-    've-visual-essay': window.httpVueLoader(`${window.config.baseurl}juncture-components/VisualEssay.vue`),
+    've-footer': window.httpVueLoader(`${window.config.baseurl}/juncture/components/Footer.vue`),
+    've-header': window.httpVueLoader(`${window.config.baseurl}/juncture/components/Header.vue`),
+    've1-image': window.httpVueLoader(`${window.config.baseurl}/juncture/components/Image.vue`),
+    've1-map': window.httpVueLoader(`${window.config.baseurl}/juncture/components/Map.vue`),
+    've-visual-essay': window.httpVueLoader(`${window.config.baseurl}/juncture/components/VisualEssay.vue`),
   },
   props: {
     inputHtml: String
@@ -138,7 +137,6 @@ module.exports = {
     anchor: null,
     authenticatedUser: null,
     availableViewers,
-    componentsList,
     contentSource,
     doActionCallback: {},
     entities: {},
@@ -197,7 +195,7 @@ module.exports = {
     this.mdDir = pathIsDir ? path : `/${path.split('/').filter(elem => elem).slice(0,-1).join('/')}`
     this.mdPath = pathIsDir ? path === '/' ? '/README.md' : `${path}/README.md` : `${path}.md`
     // Initialize Markdown source viewer
-    this.markdown = await getGhFile(this.mdPath)
+    //this.markdown = await getGhFile(this.mdPath)
     this.markdownViewer = tippy(this.$refs.header, {
       trigger: 'manual', 
       theme: 'light-border',
@@ -221,7 +219,7 @@ module.exports = {
     async doAction(action, options) {
       if (action === 'sendmail') {
         this.doActionCallback = {status: 'processing', message: 'Processing request'}
-        let resp = await sendmail(options)
+        await sendmail(options)
         this.doActionCallback = {status: 'done', message: 'Email sent'}
       } else if (action === 'view-markdown') {
         this.markdownViewer.show()
@@ -238,9 +236,10 @@ module.exports = {
       } else if (action === 'logout') {
         this.logout()
       } else if (action === 'load-page') {
-        let newPage = `${this.contentSource.basePath}${options}`
+        // let newPage = `${this.contentSource.basePath}${options}`
+        let newPage = options
         if (this.qargs.ref) newPage += `?ref=${this.qargs.ref}`
-        console.log('load-page', this.contentSource.basePath)
+        console.log('load-page', this.contentSource.basePath, options, newPage)
         location.href = newPage
       }
     },
@@ -298,12 +297,25 @@ module.exports = {
         })
       this.entities = await this.getEntityData(this.findEntities(tmp, this.params))
       this.html = tmp.outerHTML
-      let essayConfig = this.params.find(param => param['ve-config'])
-      if (essayConfig.banner) essayConfig.banner = convertURL(essayConfig.banner, this.mdDir)
+      let essayConfig = this.params.find(param => param['ve-config']) || {}
       essayConfig.header = essayConfig.header || 'header'
       essayConfig.main = essayConfig.main || essayConfig.component || 'visual-essay'
       essayConfig.footer = essayConfig.footer || 'footer'
       this.essayConfig = essayConfig
+    },
+
+    convertResourceUrls(root) {
+      // root.querySelectorAll('img').forEach(img => {
+      //  if (img.src.indexOf(window.location.origin) === 0) img.setAttribute('src', convertURL(img.src, this.mdDir))
+      //})
+      root.querySelectorAll('param').forEach(param => {
+        ['url', 'banner', 'article', 'logo'].forEach(attr => {
+          if (param.getAttribute(attr) && param.getAttribute(attr).indexOf('/') === 0) {
+            param.setAttribute(attr, `${contentSource.basePath}${param.getAttribute(attr)}`)
+          }
+        })
+      })
+      return root
     },
 
     // Finds all entity references in param tags
@@ -426,20 +438,6 @@ module.exports = {
       resp = await resp.json()
       resp.results.bindings.forEach(rec => entities[rec.item.value.split('/').pop()]['mwPage'] = rec.mwPage.value)
       return entities
-    },
-
-    convertResourceUrls(root) {
-      root.querySelectorAll('img').forEach(img => {
-        if (img.src.indexOf(window.location.origin) === 0) img.setAttribute('src', convertURL(img.src, this.mdDir))
-      })
-      root.querySelectorAll('param').forEach(param => {
-        ['url', 'banner', 'article', 'logo'].forEach(attr => {
-          if (param.attributes[attr]) {
-            param.setAttribute(attr, convertURL(param.attributes[attr].value, this.mdDir))
-          }
-        })
-      })
-      return root
     },
 
     // Creates a GeoJSON file URL from a Who's on First ID 
@@ -741,14 +739,14 @@ Vue.mixin({
       // let ghToken = oauthAccessToken || ghUnscopedToken
       // console.log(`getFile: path=${path} acct=${acct} repo=${repo} ref=${ref} ghToken=${ghToken}`)
       if (repo) {
-        let url = `https://api.github.com/repos/${acct}/${repo}/contents${path}?ref=${ref}`
-        let resp = await fetch(url, ghToken ? {headers: {Authorization:`Token ${ghToken}`}} : {})
+        // let url = `https://api.github.com/repos/${acct}/${repo}/contents${path}?ref=${ref}`
+        // let resp = await fetch(url, ghToken ? {headers: {Authorization:`Token ${ghToken}`}} : {})
+        let resp = await fetch(`https://raw.githubusercontent.com/${acct}/${repo}/${ref}/${path}`)
         if (resp.ok) {
           resp = await resp.json()
           return { sha: resp.sha, content: decodeURIComponent(escape(atob(resp.content))) }
         }
       } else {
-        console.log(url)
         let url = `${this.contentSource.baseUrl}${this.contentSource.basePath}${path}`
         let resp = await fetch(url)
         if (resp.ok) resp = await resp.text()
@@ -855,7 +853,6 @@ function setMetaDescription(description) {
   el.content = description
   document.querySelector('head').appendChild(el)
 }
-function camelToKebab(input) { return input.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()}
 function isNumeric(arg) { return !isNaN(arg) }
 function isEntityID(arg) { return typeof arg === 'string' && arg.split(':').slice(-1).find(val => val.length > 1 && val[0] === 'Q' && isNumeric(val.slice(1))) !== undefined }
 function attrsToObject(el) { return Object.fromEntries(Array.from(el.attributes).map(attr => [attr.nodeName, attr.value === '' || attr.value === 'true' ? true : attr.value === 'false' ? false : attr.value] )) }
@@ -874,34 +871,6 @@ function parseUrl(href) {
   return (match && {protocol: match[1], host: match[2], hostname: match[3], origin: `${match[1]}://${match[2]}`,
           port: match[4], pathname: match[5] || '/', search: match[6], hash: match[7]}
   )
-}
-
-function convertURL(current, base) {
-  base = base || '/'
-  let _current = current.replace(/\s/g, '%20')
-  let pathElems = []
-  if (_current.indexOf('http') === 0) {
-    if (_current.indexOf(window.location.origin) === 0) {
-      let dirElems = base.split('/').filter(elem => elem).slice(0,-1)
-      let mdDir = dirElems.length > 0 ? `/${dirElems.join('/')}/` : '/'
-      _current = _current.replace(new RegExp(base.replace(/\//g, '\\/')), `${mdDir}`)
-      pathElems = _current.split('/').slice(3)
-    }
-    else return _current
-  } else if (_current.indexOf('/') === 0) {
-    pathElems = _current.split('/').filter(elem => elem)
-  } else {
-    pathElems = (base || window.location.pathname).split('/').filter(elem => elem)
-    pathElems = [...pathElems, ..._current.split('/').filter(elem => elem)]
-  }
-  if (isJuncture && pathElems.length >= 2) {
-    if ((contentSource.repo !== 'juncture' || contentSource.acct !== 'jstor-labs') && pathElems[0] === contentSource.acct && pathElems[1] === contentSource.repo) pathElems = pathElems.slice(2)
-  } else if (pathElems[0] === contentSource.repo) {
-    pathElems = pathElems.slice(1)
-  }
-  let converted = `${contentSource.assetsBaseUrl || contentSource.baseUrl}/${pathElems.join('/')}`
-  // console.log(`isJuncture=${isJuncture} convertURL: current=${current} converted=${converted} pathElems=${pathElems}`)
-  return converted
 }
 
 </script>

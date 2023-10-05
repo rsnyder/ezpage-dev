@@ -120,7 +120,7 @@
       contactMessage: null
     }),    
     computed: {
-      containerStyle() { return { 
+      containerStyle() { return  this.banner && { 
         height: this.viewerIsActive ? `${this.scrollTop < 400 ? 400 - this.scrollTop : 0}px` : '0',
         backgroundColor: 'white',
         backgroundImage: `url(${this.banner})`

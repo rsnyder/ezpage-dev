@@ -55,7 +55,7 @@ module.exports = {
       this.$nextTick(() => {
         this.addPopups(this.entities)
         let segments = [...essayElem.querySelectorAll('.segment')]
-        if (this.anchor) {
+        if (this.anchor && location.pathname.split('/').filter(p => p).indexOf('preview') === -1) {
           let anchorElem = document.getElementById(this.anchor)
           if (anchorElem) {
             this.$emit('scroll-to-anchor')
