@@ -4,15 +4,7 @@ function structureContent() {
   let main = document.querySelector('main')
   let restructured = document.createElement('main')
 
-  console.log(main)
-  main.querySelectorAll('p').forEach(p => {
-    if (/^\s*\.ve-.+\s+/.test(p.textContent)) {
-      console.log(p.textContent)
-    }
-  })
-
   let children = []
-  /*
   Array.from(main?.children || []).forEach((el, idx) => {
     if (/^\s*{#.*}\s*$/.test(el.textContent)) {      
       let i = children.length-1
@@ -23,7 +15,6 @@ function structureContent() {
       children.push(el)
     }
   })
-  */
 
   let currentSection = restructured;
   let sectionParam
@@ -216,7 +207,7 @@ function addWebComponentsScript() {
 async function init() {
 
   convertToElements()
-  // structureContent()
+  structureContent()
   addWebComponentsScript()
 }
 
