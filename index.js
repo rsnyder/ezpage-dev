@@ -98,9 +98,9 @@ function computeDataId(el) {
   return dataId.reverse().join('.')
 }
 
-function convertToElements(root, prefix) {
+function convertWcTagsToElements(root) {
+  // Converts Web Component tags to HTML elements
   root = root || document.querySelector('main')
-  prefix = prefix || 've'
 
   root.querySelectorAll('a').forEach(anchorElem => {
     let link = new URL(anchorElem.href)
@@ -117,22 +117,21 @@ function convertToElements(root, prefix) {
       img.parentNode.replaceWith(ezImage)
     })
 
-  let regex = new RegExp(`^\\s*\\.${prefix}-\\w+\\s*`)
+  let regex = new RegExp(`^\\s*\\.\\w+-\\w+\\s*`)
   Array.from(root.querySelectorAll('p'))
     .filter(p => regex.test(p.textContent || ''))
     .forEach(p => {
-      let html = componentHtml(p, prefix)
+      let tag = p.textContent.trim().split(' ')[0].slice(1).trim()
+      let html = componentHtml(p, tag)
       let el = new DOMParser().parseFromString(html, 'text/html').children[0].children[1].children[0]
       p.parentNode?.replaceChild(el, p)
     })
 }
 
-function componentHtml(el, prefix) {
+function componentHtml(el, tag) {
   let lines = el.innerHTML?.trim().split('\n').map(line => line.trim()) || []
   if (lines.length === 0) return ''
   let headLine = lines[0]
-  let regex = new RegExp(`^\\s*\\.${prefix}-\\w+\\s*`)
-  let tag = headLine.match(regex)?.[0].trim().slice(1)
   let attrs = asAttrs(parseHeadline(headLine))
 
   let slot = ''
@@ -181,25 +180,24 @@ async function getGhFile(acct, repo, branch, path) {
   }
 }
 
-function addWebComponentsScript() {
+function addWebComponentsScript(url) {
   let wcScriptEl = document.createElement('script')
   wcScriptEl.setAttribute('type', 'module')
-  wcScriptEl.setAttribute('src',
-    location.hostname === 'localhost'
-    ? 'http://localhost:5173/src/main.ts' 
-    : 'https://juncture-digital.github.io/web-components/js/index.js'
-  )
+  wcScriptEl.setAttribute('src', url)
   wcScriptEl.addEventListener('load', () => { 
-    // console.log('Web Components script loaded')
+    console.log(`Web Components script ${url} loaded`)
   })
   document.body.appendChild(wcScriptEl)
 }
 
 async function init() {
 
-  convertToElements()
+  config.components = config.components ? JSON.parse(config.components) : []
+  console.log(config)
+
+  convertWcTagsToElements()
   structureContent()
-  addWebComponentsScript()
+  config.components.forEach(url => addWebComponentsScript(url) )
 }
 
 document.addEventListener('DOMContentLoaded', () =>  init() )

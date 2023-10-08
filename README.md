@@ -1,6 +1,6 @@
 # EZPage
 
-.ve-header
+.ez-header
     - [Menu item 1](/page1)
     - [Menu item 2](/page2)
     - [Menu item 3](/page3)
