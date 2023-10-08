@@ -193,7 +193,7 @@ function addWebComponentsScript(url) {
 async function init() {
 
   console.log(config)
-  config.components = config.components ? JSON.parse(config.components) : []
+  config.components = config.components ? config.components.split(',').map(l => l.trim()) : []
   console.log(config)
 
   convertWcTagsToElements()

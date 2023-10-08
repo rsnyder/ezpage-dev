@@ -16,6 +16,4 @@ github:
 url: https://rsnyder.github.io/ezpage-dev/
 baseurl: /ezpage-dev
 
-components: ["https://rsnyder.github.io/ezpage-wc/js/index.js", "https://juncture-digital.github.io/web-components/js/index.js"]
-
-keep_files: ["_config.yml"]
+components: https://rsnyder.github.io/ezpage-wc/js/index.js,https://juncture-digital.github.io/web-components/js/index.js

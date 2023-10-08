@@ -87,7 +87,7 @@ html_template = html_template.replace('{{ site.github.owner }}', config['github'
 html_template = html_template.replace('{{ site.github.repo }}', config['github']['repo'])
 html_template = html_template.replace('{{ site.github.branch }}', config['github']['branch'])
 html_template = html_template.replace('{{ site.baseurl }}', '')
-html_template = html_template.replace('{{ site.components }}', json.dumps(config['components']))
+html_template = html_template.replace('{{ site.components }}', config['components'])
   
 def html_from_markdown(md, baseurl):
   html = html_template.replace('{{ content }}', markdown.markdown(md, extensions=['extra', 'toc']))
