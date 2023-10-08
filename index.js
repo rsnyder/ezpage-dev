@@ -217,7 +217,7 @@ async function init() {
 
   convertToElements()
   // structureContent()
-  // addWebComponentsScript()
+  addWebComponentsScript()
 }
 
 document.addEventListener('DOMContentLoaded', () =>  init() )
