@@ -192,6 +192,7 @@ function addWebComponentsScript(url) {
 
 async function init() {
 
+  console.log(config)
   config.components = config.components ? JSON.parse(config.components) : []
   console.log(config)
 
