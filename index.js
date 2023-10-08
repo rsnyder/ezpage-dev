@@ -101,14 +101,12 @@ function computeDataId(el) {
 async function convertToElements(root, prefix) {
   root = root || document.querySelector('main')
   prefix = prefix || 've'
-  /*
+
   let config = await getConfig()
   el.querySelectorAll('a').forEach(anchorElem => {
     let link = new URL(anchorElem.href)
-    // let qargs = new URLSearchParams(link.search)
     if (isGHP && link.origin === location.origin && link.pathname.indexOf(`/${config.repo}/`) !== 0) anchorElem.href = `/${config.repo}${link.pathname}`
   })
-  */
 
   Array.from(root.querySelectorAll('img'))
     .forEach(img => {
