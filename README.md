@@ -1,10 +1,12 @@
 # EZPage
 
-<ve-menu1>
-  <ul>
-    <li><a href="/">Home</a></li>
-    <li><a href="/about">About</a></li>
-  </ul>
-</ve-menu1>
+.ve-header
+    - [Menu item 1](/page1)
+    - [Menu item 2](/page2)
+    - [Menu item 3](/pagee)
 
-- [Juncture 1 Essay](/juncture1)
+.ve-media
+    - some-image-url
+    - another-image-url "With a title"
+
+[Juncture 1 Essay](/juncture1)

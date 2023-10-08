@@ -77,32 +77,27 @@ seo = f'''
 '''
 
 not_found_page = open(f'{BASEDIR}/404.html', 'r').read()
-header = open(f'{BASEDIR}/_includes/header.html', 'r').read()
-footer = open(f'{BASEDIR}/_includes/footer.html', 'r').read()
 favicon = open(f'{BASEDIR}/favicon.ico', 'rb').read()
 
 html_template = open(f'{BASEDIR}/_layouts/default.html', 'r').read()
 
-include_header = config['layout']['header'] == 'true'
-include_footer = config['layout']['footer'] == 'true'
-html_template = re.sub(r'^\s*{%- if site.layout.header == "true" -%}\s*{%- include header.html -%}\s*{%- endif -%}', header if include_header else '', html_template, flags=re.MULTILINE)
-html_template = re.sub('^\s*{%- if site.layout.footer == "true" -%}\s*{%- include footer.html -%}\s*{%- endif -%}', footer if include_footer else '', html_template, flags=re.MULTILINE)
-
 # html_template = html_template.replace('https://rsnyder.github.io/ezpage-wc/js/index.js', 'http://localhost:5173/src/main.ts')
 html_template = html_template.replace('{%- seo -%}', seo)
-html_template = html_template.replace('{{ site.mode }}', config['mode'])
 html_template = html_template.replace('{{ site.github.owner }}', config['github']['owner'])
 html_template = html_template.replace('{{ site.github.repo }}', config['github']['repo'])
 html_template = html_template.replace('{{ site.github.branch }}', config['github']['branch'])
 html_template = html_template.replace('{{ site.baseurl }}', '')
-html_template = html_template.replace('{%- if site.mode == "juncture" -%}', '')
-# html_template = re.sub(r'^\s*{%-\s+else\s+-%}\s*.*\s*{%-\s+endif\s+-%}', '', html_template, flags=re.MULTILINE)
-html_template = re.sub(r'^\s*{%-\s+endif\s+-%}', '', html_template, flags=re.MULTILINE)
-html_template = re.sub(r'^\s*{%- .*$', '', html_template)
   
 def html_from_markdown(md, baseurl):
   html = html_template.replace('{{ content }}', markdown.markdown(md, extensions=['extra', 'toc']))
   soup = BeautifulSoup(html, 'html5lib')
+  for tag in soup.find_all(re.compile('^ve-')):
+    parent = tag.parent
+    if parent.next_sibling and parent.next_sibling.name == 'ul':
+      options_list = parent.next_sibling
+      tag.append(options_list)
+      parent.replace_with(tag)
+      # tag.parent.next_sibling.decompose()
   for link in soup.find_all('a'):
     href = link.get('href')
     if href and not href.startswith('http') and not href.startswith('#') and not href.startswith('/'):

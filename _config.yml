@@ -3,8 +3,6 @@ author:
   name: rsnyder
   email: ron@snyderjr.com
 
-mode: juncture
-
 # The `>` after `description:` means to ignore line-breaks until next key.
 # If you want to omit the line-break after the end of text, use `>-` instead.
 description: >-
@@ -17,7 +15,3 @@ github:
 
 url: https://rsnyder.github.io/ezpage-dev/
 baseurl: /ezpage-dev
-
-layout:
-  header: false
-  footer: false
