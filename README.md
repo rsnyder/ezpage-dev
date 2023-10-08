@@ -3,7 +3,7 @@
 .ve-header
     - [Menu item 1](/page1)
     - [Menu item 2](/page2)
-    - [Menu item 3](/pagee)
+    - [Menu item 3](/page3)
 
 .ve-media
     - some-image-url
