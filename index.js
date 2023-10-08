@@ -102,10 +102,8 @@ function convertToElements(root, prefix) {
   root = root || document.querySelector('main')
   prefix = prefix || 've'
 
-  console.log(`convertToElements: isGHP=${isGHP}`, config)
   root.querySelectorAll('a').forEach(anchorElem => {
     let link = new URL(anchorElem.href)
-    console.log(link.origin, location.origin, link.pathname)
     if (isGHP && link.origin === location.origin && link.pathname.indexOf(`/${config.repo}/`) !== 0) anchorElem.href = `/${config.repo}${link.pathname}`
   })
 
@@ -125,13 +123,11 @@ function convertToElements(root, prefix) {
     .forEach(p => {
       let html = componentHtml(p, prefix)
       let el = new DOMParser().parseFromString(html, 'text/html').children[0].children[1].children[0]
-      console.log(el)
       p.parentNode?.replaceChild(el, p)
     })
 }
 
 function componentHtml(el, prefix) {
-  console.log(el.innerHTML)
   let lines = el.innerHTML?.trim().split('\n').map(line => line.trim()) || []
   if (lines.length === 0) return ''
   let headLine = lines[0]
@@ -149,13 +145,9 @@ function componentHtml(el, prefix) {
         else if (/^-\s+.+/.test(line)) listItems.push(line)
         else listItems[listItems.length-1] += `${line}`
       })
-    console.log(listItems)
     slot = marked.parse(listItems.join('\n'))
   }
-  console.log(slot)
-  let elemHtml = `<${tag} ${attrs}>\n${slot}</${tag}>`
-  console.log('------------------')
-  return elemHtml
+  return `<${tag} ${attrs}>\n${slot}</${tag}>`
 }
 
 function parseHeadline(s) {
@@ -198,7 +190,7 @@ function addWebComponentsScript() {
     : 'https://juncture-digital.github.io/web-components/js/index.js'
   )
   wcScriptEl.addEventListener('load', () => { 
-    console.log('Web Components script loaded')
+    // console.log('Web Components script loaded')
   })
   document.body.appendChild(wcScriptEl)
 }
