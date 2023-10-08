@@ -98,13 +98,14 @@ function computeDataId(el) {
   return dataId.reverse().join('.')
 }
 
-async function convertToElements(root, prefix) {
+function convertToElements(root, prefix) {
   root = root || document.querySelector('main')
   prefix = prefix || 've'
 
-  let config = await getConfig()
+  console.log(`convertToElements: isGHP=${isGHP}`, config)
   el.querySelectorAll('a').forEach(anchorElem => {
     let link = new URL(anchorElem.href)
+    console.log(link.origin, location.origin, link.pathname)
     if (isGHP && link.origin === location.origin && link.pathname.indexOf(`/${config.repo}/`) !== 0) anchorElem.href = `/${config.repo}${link.pathname}`
   })
 
