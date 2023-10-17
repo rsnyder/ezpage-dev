@@ -1,5 +1,29 @@
 const isGHP = /\.github\.io$/.test(location.hostname)
 
+const referrerUrl = document.referrer
+if (referrerUrl) {
+  console.log(`referrer=${referrerUrl}`)
+  let referrer = new URL(referrerUrl)
+  if (referrer.host === 'github.com') {
+    let [acct, repo, _, branch, ...path] = referrer.pathname.slice(1).split('/').filter(pe => pe && pe !== 'README.md')
+    if (acct && repo && branch) {
+      const redirectUrl = `${window.location.origin}/${isGHP ? repo + '/' : ''}preview/?branch=${branch}#${acct}/${repo}/${path.join('/')}`
+      console.log(`Redirecting for preview: ${redirectUrl}`)
+      window.location = redirectUrl
+    }
+  }
+}
+
+async function getConfig() {
+  if (window._config) return window._config
+  let resp = await fetch('/juncture/config.yml')
+  if (resp.ok) window._config = {
+    ...window.config,
+    ...window.jsyaml.load(await resp.text())
+  }
+  return window._config
+}
+
 function structureContent() {
   let main = document.querySelector('main')
   let restructured = document.createElement('main')
@@ -98,6 +122,86 @@ function computeDataId(el) {
   return dataId.reverse().join('.')
 }
 
+function createApp() {
+  let main = document.querySelector('main')
+  let tmp = new DOMParser().parseFromString(main.innerHTML, 'text/html').children[0].children[1]
+
+  let img = tmp.querySelector('a img')
+  if (img?.src.indexOf('ve-button') > -1) img.parentElement?.parentElement?.remove()
+
+  // Array.from(tmp.querySelectorAll('p > param')).forEach(param => param.parentElement?.after(param))
+
+  Array.from(tmp.querySelectorAll('[data-id]'))
+    .forEach(seg => {
+      if (seg.tagName === 'SECTION') return
+      let id = seg.getAttribute('data-id') || ''
+      let wrapper = document.createElement('div')
+      wrapper.setAttribute('data-id', id)
+      wrapper.id = id
+      wrapper.className = seg.className
+      seg.removeAttribute('id')
+      seg.removeAttribute('data-id')
+      seg.className = ''
+      wrapper.appendChild(seg.cloneNode(true))
+      while (seg.nextSibling) {
+        let sib = seg.nextSibling
+        if (sib.nodeName !== 'PARAM') break
+        wrapper.appendChild(sib)
+      }
+      seg.replaceWith(wrapper)
+    })
+
+  Array.from(tmp.querySelectorAll('div'))
+    .filter(div => {
+      let content = div.textContent?.trim()
+      return content === '' || content === '#'
+    })
+    .forEach(div => div.remove())
+
+  let html = tmp.innerHTML
+
+  /*
+  while (document.body.firstChild) { document.body.removeChild(document.body.firstChild) }
+*/
+  Array.from(document.body.children).forEach(child => {
+    if (child.tagName !== 'EZ-HEADER') document.body.removeChild(child)
+  })
+
+  main = document.createElement('div')
+  main.id = 'vue'
+  main.innerHTML = `<juncture-v1 :input-html="html"></juncture-v1>`
+  document.body.appendChild(main)
+
+  window.Vue.directive('highlightjs', {
+    deep: true,
+    bind: function(el, binding) {
+      let targets = el.querySelectorAll('code')
+      targets.forEach((target) => {
+        if (binding.value) {
+          target.textContent = binding.value
+        }
+        window.hljs.highlightBlock(target)
+      })
+    },
+    componentUpdated: function(el, binding) {
+      let targets = el.querySelectorAll('code')
+      targets.forEach((target) => {
+        if (binding.value) {
+          target.textContent = binding.value
+          window.hljs.highlightBlock(target)
+        }
+      })
+    }
+  })
+  new window.Vue({
+    el: '#vue',
+    components: {
+      'juncture-v1': window.httpVueLoader(`${window.config.baseurl}/juncture/components/JunctureV1.vue`)
+    },
+    data: () => ({ html })
+  })
+}
+
 function convertWcTagsToElements(root) {
   // Converts Web Component tags to HTML elements
   root = root || document.querySelector('main')
@@ -180,25 +284,74 @@ async function getGhFile(acct, repo, branch, path) {
   }
 }
 
-function addWebComponentsScript(url) {
-  let wcScriptEl = document.createElement('script')
-  wcScriptEl.setAttribute('type', 'module')
-  wcScriptEl.setAttribute('src', url)
-  wcScriptEl.addEventListener('load', () => { 
-    console.log(`Web Components script ${url} loaded`)
+function loadDependencies(dependencies, callback, i) {
+  i = i || 0
+  // console.log(`loading ${dependencies[i].src || dependencies[i].href}`)
+  loadDependency(dependencies[i], () => {
+    if (i < dependencies.length-1) loadDependencies(dependencies, callback, i+1) 
+    else callback()
   })
-  document.body.appendChild(wcScriptEl)
 }
 
-async function init() {
+function loadDependency(dependency, callback) {
+  let e = document.createElement(dependency.tag)
+  Object.entries(dependency).forEach(([k, v]) => { if (k !== 'tag') e.setAttribute(k, v) })
+  e.addEventListener('load', callback)
+  if (dependency.tag === 'script') document.body.appendChild(e)
+  else document.head.appendChild(e)
+}
 
-  console.log(config)
+let junctureDependencies = [
+  {tag: 'link', rel: 'stylesheet', href: '/juncture/index.css'},
+  {tag: 'link', rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css'},
+  {tag: 'script', src: 'https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js'},
+  {tag: 'script', src: 'https://cdn.jsdelivr.net/npm/marked/marked.min.js'},
+  {tag: 'script', src: 'https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js'},
+  {tag: 'script', src: 'https://cdn.jsdelivr.net/npm/http-vue-loader@1.4.2/src/httpVueLoader.min.js'},
+  {tag: 'script', src: 'https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js'},
+  {tag: 'script', src: 'https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js'},
+  {tag: 'script', src: 'https://cdnjs.cloudflare.com/ajax/libs/tippy.js/6.3.7/tippy.umd.min.js'},
+  {tag: 'script', src: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js'},
+]
+
+async function init() {
+  console.log(`env.test=${process.env.test}`)
+  let isPreview = location.pathname === `${config.baseurl}/preview/`
+  if (isPreview) {
+    let [acct, repo, ...path] = location.hash.slice(1).split('/')
+    const branch = new URLSearchParams(location.search).get('branch') || 'main'
+    let md = await getGhFile(acct, repo, branch, `${path.join('/')}/README.md`)
+    document.querySelector('main').innerHTML = marked.parse(md)
+  }
+
+  let isJunctureV1 = Array.from(document.querySelectorAll('param'))
+  .find(param =>
+    Array.from(param.attributes).find(attr => attr.name.indexOf('ve-') === 0)
+  ) !== undefined
+
+  console.log(`init isPreview=${isPreview} isJunctureV1=${isJunctureV1}`)
+
   config.components = config.components ? config.components.split(',').map(l => l.trim()) : []
   console.log(config)
 
   convertWcTagsToElements()
   structureContent()
-  config.components.forEach(url => addWebComponentsScript(url) )
+  let dependencies = config.components.map(src => ({tag: 'script', type: 'module', src}) )
+  if (isJunctureV1) dependencies = dependencies.concat(junctureDependencies)
+  if (dependencies.length > 0) loadDependencies(dependencies, () => { 
+    if (isJunctureV1) createApp()
+    /*
+    let header = document.querySelector('ez-header')
+    if (header) {
+      header.setAttribute('title', 'Title')
+      header.innerHTML = `
+        <ul>
+         <li><a href="/">Menu Item 1</a></li>
+        </ul>
+      `
+    }
+    */
+  })
 }
 
 document.addEventListener('DOMContentLoaded', () =>  init() )

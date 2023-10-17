@@ -14,6 +14,7 @@ logger.setLevel(logging.INFO)
 import argparse, json, os, re
 
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
+LOCAL_WC = os.environ.get('LOCAL_WC', 'false').lower() == 'true'
 
 from bs4 import BeautifulSoup
 import markdown
@@ -77,9 +78,16 @@ seo = f'''
 '''
 
 not_found_page = open(f'{BASEDIR}/404.html', 'r').read()
+header = open(f'{BASEDIR}/_includes/header.html', 'r').read()
+footer = open(f'{BASEDIR}/_includes/footer.html', 'r').read()
 favicon = open(f'{BASEDIR}/favicon.ico', 'rb').read()
 
+if LOCAL_WC:
+  config['components'] = config['components'].replace('https://juncture-digital.github.io/web-components/js/index.js', 'http://localhost:5173/')
+
 html_template = open(f'{BASEDIR}/_layouts/default.html', 'r').read()
+html_template = re.sub(r'^\s*{%- include header.html -%}', header, html_template, flags=re.MULTILINE)
+html_template = re.sub(r'^\s*{%- include footer.html -%}', footer, html_template, flags=re.MULTILINE)
 
 # html_template = html_template.replace('https://rsnyder.github.io/ezpage-wc/js/index.js', 'http://localhost:5173/src/main.ts')
 html_template = html_template.replace('{%- seo -%}', seo)
@@ -141,6 +149,9 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='EZpage dev server')  
   parser.add_argument('--reload', type=bool, default=True, help='Reload on change')
   parser.add_argument('--port', type=int, default=8080, help='HTTP port')
+  parser.add_argument('--localwc', type=bool, default=False, help='Use local web components')
   args = vars(parser.parse_args())
   
+  os.environ['LOCAL_WC'] = str(args['localwc'])
+
   uvicorn.run('server:app', port=args['port'], log_level='info', reload=args['reload'])

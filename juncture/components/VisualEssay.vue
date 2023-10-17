@@ -182,7 +182,8 @@ module.exports = {
                   let re = new RegExp(`(^|[\\s(>])(${toMatch[i].replace(/'/, "'?")})([\\s)<;:,.]|$)`, 'i')
                   let match = re.exec(paraHTML)
                   if (match) {
-                    paraHTML = paraHTML.replace(match[2], `<span class="entity inferred" data-eid="${id}">${match[2]}</span>`)
+                    // paraHTML = paraHTML.replace(match[2], `<span class="entity inferred" data-eid="${id}">${match[2]}</span>`)
+                    paraHTML = paraHTML.replace(match[2], `<ve-entity-infobox qid="${id}">${match[2]}</ve-entity-infobox>`)
                     entity.foundIn.add(para.parentElement.dataset.id)
                     break
                   }
@@ -194,15 +195,22 @@ module.exports = {
       })
       Array.from(root.querySelectorAll('p span')).forEach(span => {
         if (span.attributes.eid) {
-          span.setAttribute('data-eid', span.attributes.eid.value)
-          span.classList.add('entity', 'tagged')
+          // span.setAttribute('data-eid', span.attributes.eid.value)
+          // span.classList.add('entity', 'tagged')
+          let entityInfobox = document.createElement('ve-entity-infobox')
+          entityInfobox.innerHTML = span.innerHTML
+          entityInfobox.setAttribute('qid', span.attributes.eid.value)
+          span.replaceWith(entityInfobox)
         }
       })
+
+      /*
       Array.from(root.querySelectorAll('span.entity'))
         .forEach(el => el.addEventListener('click', (e) => {
           // console.log('entity selected', e.target.dataset.eid)
         })
       )
+      */
     }
   },
   watch: {

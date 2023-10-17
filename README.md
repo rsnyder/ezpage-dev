@@ -1,10 +1,5 @@
 # EZPage
 
-.ez-header
-    - [Menu item 1](/page1)
-    - [Menu item 2](/page2)
-    - [Menu item 3](/page3)
-
 .ve-media 
     - wc:Sunflower_sky_backdrop.jpg
     - wc:Arc_de_triomphe_du_carrousel_in_Paris_France.jpg
