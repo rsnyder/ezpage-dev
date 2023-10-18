@@ -26,6 +26,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Test
+        run: |
+          echo 'test: test' >> _config.yml
       - name: Checkout
         uses: actions/checkout@v3
       - name: Setup Pages
@@ -37,9 +40,6 @@ jobs:
           destination: ./_site
         env:
           test: test environment variable
-      - name: Test
-        run: |
-          echo 'test: test' >> _config.yml
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
 
