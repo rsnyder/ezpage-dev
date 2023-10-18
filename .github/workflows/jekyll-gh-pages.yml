@@ -37,6 +37,7 @@ jobs:
           destination: ./_site
         env:
           test: test environment variable
+      - name: Test
         run: |
           echo 'test: test' >> _config.yml
       - name: Upload artifact
