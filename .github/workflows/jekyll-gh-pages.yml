@@ -28,7 +28,7 @@ jobs:
     steps:
       - name: Test
         run: |
-          echo 'test: test' >> test.yml
+          echo 'test: test' > ./test.yml
       - name: Checkout
         uses: actions/checkout@v3
       - name: Setup Pages
@@ -38,8 +38,6 @@ jobs:
         with:
           source: ./
           destination: ./_site
-        env:
-          test: test environment variable
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
 
