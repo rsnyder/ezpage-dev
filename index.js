@@ -315,8 +315,6 @@ let junctureDependencies = [
 ]
 
 async function init() {
-  console.log(env)
-  console.log(`env.test=${process.env.test}`)
   let isPreview = location.pathname === `${config.baseurl}/preview/`
   if (isPreview) {
     let [acct, repo, ...path] = location.hash.slice(1).split('/')

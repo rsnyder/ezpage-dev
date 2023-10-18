@@ -37,6 +37,8 @@ jobs:
           destination: ./_site
         env:
           test: test environment variable
+        run: |
+          echo 'test: test' >> _config.yml
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
 
